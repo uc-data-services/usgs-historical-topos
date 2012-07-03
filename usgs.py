@@ -4,7 +4,6 @@ import os
 import urllib2
 import random
 import logging
-
 try:
     from cStringIO import StringIO #faster
 except:
@@ -38,19 +37,13 @@ def open_csv_get_urls():
     """
     Opens csv and gets urls from file. Returns a list of urls.
     """
-        #if not empty:
-      #      pass
-        #else:
-            #done, call finish up method
-    #if not file:
     histtops = csv.DictReader(open(USGS_CSV))
     urllist = list()
     for row in histtops:
         urllist.append(row['DownloadGeoPDF'])
     urllist = random.sample(urllist, 5) #for testing
     geourls = [url.replace(' ', '%20') for url in urllist]
-    #print (geourls)
-    logger.info('Number of urls in file: %d' %len(geouls))
+    logger.info('Number of urls in file: %d' %len(geourls))
     return geourls
 
 def get_start_and_end_index():
@@ -67,9 +60,7 @@ def get_start_and_end_index():
     else:
         start_index = 0
         stop_index = start_index+bulk_run
-
     return start_index, stop_index
-
 
 def save_last_processed_index(last_index):
     """
@@ -84,8 +75,6 @@ def open_and_unzip_geofiles(geourls, start_index, stop_index):
     takes a list of urls, opens, and saves to a file
     """
     #TODO: figure out how to iterate a list and stop at a count
-    #start = last_index+1
-    #end = last_index+21
     for index, url in enumerate(geourls[start_index:stop_index]):
         response = urllib2.urlopen(url)
         data = response.read()
@@ -93,13 +82,11 @@ def open_and_unzip_geofiles(geourls, start_index, stop_index):
         unzip_geofile_and_save(input)
         if index == stop_index:
             save_last_processed_index(index)
-            logger.info("")
 
 def main():
     """ main method"""
-
     open_and_unzip_geofiles(open_csv_get_urls(), get_start_and_end_index())
-
+    logger.info("Starting log file with date")
 
 if __name__ == '__main__':
     main()
@@ -108,9 +95,5 @@ if __name__ == '__main__':
 # TODO: error handling
 # TODO; time how long it takes to download and unzip each one - logging has time stuff
 # TODO: need to keep track of downloaded files and links, where we are in list of urls, batch running and where to pick back up
-# TODO: for above explore popping off the list
-# TODO: poss use pickle to persist tracking
 # TODO: need logging
 # TODO: run as chron
-
-
