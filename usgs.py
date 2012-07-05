@@ -16,9 +16,9 @@ LAST_LIST_ITEM_FILE = "last_index_processed"
 #TODO: find a better way to instantiate logger
 logger = logging.getLogger('usgs-scrape')
 handler = logging.FileHandler('usgs.log')
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 handler.setFormatter(formatter)
-logger.addHandler(hdlr)
+logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 def unzip_geofile_and_save(io_input):
@@ -31,7 +31,8 @@ def unzip_geofile_and_save(io_input):
         geo_pdf.write(zf.read(name))
         geo_pdf.flush()
         geo_pdf.close()
-        logger.info('File %s to directory' %name)
+        logger.info('Saved file %(file)s to %(dir)s' % \
+                    {'file':name, 'dir':SAVE_DIR})
 
 def open_csv_get_urls():
     """
@@ -43,7 +44,8 @@ def open_csv_get_urls():
         urllist.append(row['DownloadGeoPDF'])
     urllist = random.sample(urllist, 5) #for testing
     geourls = [url.replace(' ', '%20') for url in urllist]
-    logger.info('Number of urls in file: %d' %len(geourls))
+    logger.info('Number of urls in %(usgs_file)s: %(#)03d' % \
+                {'usgs_file':USGS_CSV, '#': len(geourls)})
     return geourls
 
 def get_start_and_end_index():
