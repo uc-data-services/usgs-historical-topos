@@ -12,7 +12,7 @@ except:
 USGS_CSV = "usgshist.csv" #USGS Historical Topo Download
 SAVE_DIR = "/home/tim/usgs" #think about getting this from cmd line arg
 LAST_LIST_ITEM_FILE = "last_index_processed"
-#setting up logger
+#setting up logger below
 #TODO: find a better way to instantiate logger
 logger = logging.getLogger('usgs-scrape')
 handler = logging.FileHandler('usgs.log')
@@ -42,7 +42,7 @@ def open_csv_get_urls():
     urllist = list()
     for row in histtops:
         urllist.append(row['DownloadGeoPDF'])
-    urllist = random.sample(urllist, 5) #for testing
+    urllist = random.sample(urllist, 10) #for testing
     geourls = [url.replace(' ', '%20') for url in urllist]
     logger.info('Number of urls in %(usgs_file)s: %(#)03d' % \
                 {'usgs_file':USGS_CSV, '#': len(geourls)})
@@ -54,7 +54,7 @@ def get_start_and_end_index():
     global bulk load number to determine end index. If last list file doesn't exist, will start at zero. Returns start
      index and end index.
     """
-    bulk_run = 20
+    bulk_run = 5
     if os.path.isfile(LAST_LIST_ITEM_FILE):
         with open(LAST_LIST_ITEM_FILE, 'r') as f:
             start_index = int(f.read())+1
@@ -70,7 +70,7 @@ def save_last_processed_index(last_index):
     """
     with open(LAST_LIST_ITEM_FILE, 'at') as f:
         f.write(last_index)
-    logger.info('Set to log last index num.')
+    logger.info('Index of last url/document process: %s' % last_index)
 
 def open_and_unzip_geofiles(geourls, start_index, stop_index):
     """
@@ -87,8 +87,9 @@ def open_and_unzip_geofiles(geourls, start_index, stop_index):
 
 def main():
     """ main method"""
-    open_and_unzip_geofiles(open_csv_get_urls(), get_start_and_end_index())
-    logger.info("Starting log file with date")
+    logger.info("Starting script")
+    start_index, stop_index = get_start_and_end_index()
+    open_and_unzip_geofiles(open_csv_get_urls(), start_index, stop_index)
 
 if __name__ == '__main__':
     main()
