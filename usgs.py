@@ -54,14 +54,16 @@ def get_start_and_end_index():
     global bulk load number to determine end index. If last list file doesn't exist, will start at zero. Returns start
      index and end index.
     """
-    bulk_run = 5
+    bulk_run = 5 #TODO: move to config
     if os.path.isfile(LAST_LIST_ITEM_FILE):
         with open(LAST_LIST_ITEM_FILE, 'r') as f:
             start_index = int(f.read())+1
+            print start_index
             stop_index = start_index+bulk_run
+            print stop_index
     else:
         start_index = 0
-        stop_index = start_index+bulk_run
+        stop_index = bulk_run
     return start_index, stop_index
 
 def save_last_processed_index(last_index):
@@ -69,7 +71,7 @@ def save_last_processed_index(last_index):
     saves last processed url to a file.
     """
     with open(LAST_LIST_ITEM_FILE, 'at') as f:
-        f.write(last_index)
+        f.write(str(last_index))
     logger.info('Index of last url/document process: %s' % last_index)
 
 def open_and_unzip_geofiles(geourls, start_index, stop_index):
@@ -82,7 +84,9 @@ def open_and_unzip_geofiles(geourls, start_index, stop_index):
         data = response.read()
         input = StringIO(data)
         unzip_geofile_and_save(input)
-        if index == stop_index:
+        print "stop index", stop_index
+        if index == stop_index-1:
+            print index
             save_last_processed_index(index)
 
 def main():
@@ -94,7 +98,6 @@ def main():
 if __name__ == '__main__':
     main()
 
-# TODO: context operator
 # TODO: error handling
 # TODO; time how long it takes to download and unzip each one - logging has time stuff
 # TODO: need to keep track of downloaded files and links, where we are in list of urls, batch running and where to pick back up
