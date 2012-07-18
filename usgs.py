@@ -10,6 +10,7 @@ except:
     from StringIO import StringIO
 
 USGS_CSV = "usgshist.csv" #USGS Historical Topo Download
+CSV_DIR = '/home/tim/Dropbox/usgs-historical-topos/'
 SAVE_DIR = "/home/tim/usgs" #think about getting this from cmd line arg
 LAST_LIST_ITEM_FILE = "last_index_processed"
 #setting up logger below
@@ -38,14 +39,14 @@ def open_csv_get_urls():
     """
     Opens csv and gets urls from file. Returns a list of urls.
     """
-    histtops = csv.DictReader(open(USGS_CSV))
+    histtops = csv.DictReader(open(CSV_DIR+USGS_CSV))
     urllist = list()
     for row in histtops:
         urllist.append(row['DownloadGeoPDF'])
-    urllist = random.sample(urllist, 10) #for testing
+    urllist = random.sample(urllist, 12) #for testing
     geourls = [url.replace(' ', '%20') for url in urllist]
     logger.info('Number of urls in %(usgs_file)s: %(#)03d' % \
-                {'usgs_file':USGS_CSV, '#': len(geourls)})
+                {'usgs_file':CSV_DIR+USGS_CSV, '#': len(geourls)})
     return geourls
 
 def get_start_and_end_index():
@@ -57,20 +58,22 @@ def get_start_and_end_index():
     bulk_run = 5 #TODO: move to config
     if os.path.isfile(LAST_LIST_ITEM_FILE):
         with open(LAST_LIST_ITEM_FILE, 'r') as f:
-            start_index = int(f.read())+1
+            start_index = int(f.read())
             print start_index
             stop_index = start_index+bulk_run
             print stop_index
     else:
         start_index = 0
+        print start_index
         stop_index = bulk_run
+        print stop_index
     return start_index, stop_index
 
 def save_last_processed_index(last_index):
     """
     saves last processed url to a file.
     """
-    with open(LAST_LIST_ITEM_FILE, 'at') as f:
+    with open(LAST_LIST_ITEM_FILE, 'w+') as f:
         f.write(str(last_index))
     logger.info('Index of last url/document process: %s' % last_index)
 
@@ -78,16 +81,12 @@ def open_and_unzip_geofiles(geourls, start_index, stop_index):
     """
     takes a list of urls, opens, and saves to a file
     """
-    #TODO: figure out how to iterate a list and stop at a count
     for index, url in enumerate(geourls[start_index:stop_index]):
         response = urllib2.urlopen(url)
         data = response.read()
         input = StringIO(data)
         unzip_geofile_and_save(input)
-        print "stop index", stop_index
-        if index == stop_index-1:
-            print index
-            save_last_processed_index(index)
+    save_last_processed_index(stop_index)
 
 def main():
     """ main method"""
