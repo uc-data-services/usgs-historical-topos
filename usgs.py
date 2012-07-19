@@ -8,6 +8,7 @@ try:
     from cStringIO import StringIO #faster
 except:
     from StringIO import StringIO
+from ConfigParser import SafeConfigParser
 
 USGS_CSV = "usgshist.csv" #USGS Historical Topo Download
 CSV_DIR = '/home/tim/Dropbox/usgs-historical-topos/'
@@ -88,9 +89,17 @@ def open_and_unzip_geofiles(geourls, start_index, stop_index):
         unzip_geofile_and_save(input)
     save_last_processed_index(stop_index)
 
+def get_config_info():
+    """open usgs.ini and return config"""
+    parser = SafeConfigParser()
+    parser.read('usgs.ini')
+    return parser.get('config_info',USGS_CSV), parser.get('config_info',CSV_DIR), \
+           parser.get('config_info', SAVE_DIR), parser.getint('config_info', bulk_run)
+
 def main():
     """ main method"""
     logger.info("Starting script")
+    usgs_csv, csv_dir, save_dir, bulk_run = get_config_info()#need to refactor above to use
     start_index, stop_index = get_start_and_end_index()
     open_and_unzip_geofiles(open_csv_get_urls(), start_index, stop_index)
 
