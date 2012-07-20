@@ -11,8 +11,8 @@ except:
 from ConfigParser import SafeConfigParser
 
 LAST_LIST_ITEM_FILE = "last_index_processed"
+
 #setting up logger below
-#TODO: find a better way to instantiate logger
 logger = logging.getLogger('usgs-scrape')
 handler = logging.FileHandler('usgs.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
@@ -53,7 +53,6 @@ def get_start_and_end_index(bulk_run):
     global bulk load number to determine end index. If last list file doesn't exist, will start at zero. Returns start
      index and end index.
     """
-    #bulk_run = 5 #TODO: move to config
     if os.path.isfile(LAST_LIST_ITEM_FILE):
         with open(LAST_LIST_ITEM_FILE, 'r') as f:
             start_index = int(f.read())
@@ -88,10 +87,10 @@ def open_and_unzip_geofiles(geourls, start_index, stop_index, save_dir):
         except URLError as e:
             if hasattr(e, 'reason'):
                 print 'We failed to reach a server.'
-                print 'Reason: ', e.reason
+                logger.error('Reason: ', e.reason)
             elif hasattr(e, 'code'):
                 print 'The server couldn\'t fulfill the request.'
-                print 'Error code: ', e.code
+                logger.error('Error code: ', e.code)
         else:
             data = response.read()
             input = StringIO(data)
@@ -115,7 +114,6 @@ def main():
 if __name__ == '__main__':
     main()
 
-# TODO: error handling
 # TODO; time how long it takes to download and unzip each one - logging has time stuff
 # TODO: need to keep track of downloaded files and links, where we are in list of urls, batch running and where to pick back up
 # TODO: need logging
