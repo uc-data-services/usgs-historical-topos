@@ -1,7 +1,7 @@
 import csv
 import zipfile
 import os
-import urllib2
+from urllib2 import Request, urlopen, URLError
 import random
 import logging
 try:
@@ -10,9 +10,6 @@ except:
     from StringIO import StringIO
 from ConfigParser import SafeConfigParser
 
-#USGS_CSV = "usgshist.csv" #USGS Historical Topo Download
-#CSV_DIR = '/home/tim/Dropbox/usgs-historical-topos/'
-#SAVE_DIR = "/home/tim/usgs" #think about getting this from cmd line arg
 LAST_LIST_ITEM_FILE = "last_index_processed"
 #setting up logger below
 #TODO: find a better way to instantiate logger
@@ -74,19 +71,31 @@ def save_last_processed_index(last_index):
     """
     saves last processed url to a file.
     """
-    with open(LAST_LIST_ITEM_FILE, 'w+') as f:
-        f.write(str(last_index))
-    logger.info('Index of last url/document process: %s' % last_index)
+    try:
+        with open(LAST_LIST_ITEM_FILE, 'w+') as f:
+            f.write(str(last_index))
+        logger.info('Index of last url/document process: %s' % last_index)
+    except IOError as err:
+        logger.error(err.message) #figure out what goes in ()
 
 def open_and_unzip_geofiles(geourls, start_index, stop_index, save_dir):
     """
     takes a list of urls, opens, and saves to a file
     """
     for index, url in enumerate(geourls[start_index:stop_index]):
-        response = urllib2.urlopen(url)
-        data = response.read()
-        input = StringIO(data)
-        unzip_geofile_and_save(input, save_dir)
+        try:
+            response = urlopen(url)
+        except URLError as e:
+            if hasattr(e, 'reason'):
+                print 'We failed to reach a server.'
+                print 'Reason: ', e.reason
+            elif hasattr(e, 'code'):
+                print 'The server couldn\'t fulfill the request.'
+                print 'Error code: ', e.code
+        else:
+            data = response.read()
+            input = StringIO(data)
+            unzip_geofile_and_save(input, save_dir)
     save_last_processed_index(stop_index)
 
 def get_config_info():
