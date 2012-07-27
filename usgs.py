@@ -37,6 +37,7 @@ def open_csv_get_urls(csv_dir, usgs_csv):
     """
     Opens csv and gets urls from file. Returns a list of urls.
     """
+    #TODO: try catch on this
     histtops = csv.DictReader(open(csv_dir+usgs_csv))
     urllist = list()
     for row in histtops:
@@ -115,6 +116,8 @@ if __name__ == '__main__':
     main()
 
 # TODO; time how long it takes to download and unzip each one - logging has time stuff
-# TODO: need to keep track of downloaded files and links, where we are in list of urls, batch running and where to pick back up
-# TODO: need logging
-# TODO: run as chron
+# TODO: run as chron on doemo, investigate screen
+# TODO: set up folder in john's home folder on doemo to save to
+# TODO: log number of files in folder after the runs each time
+# TODO: timing feature for script
+#TODO: John put csv file in doemo
