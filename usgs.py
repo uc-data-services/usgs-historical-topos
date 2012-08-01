@@ -26,26 +26,32 @@ def unzip_geofile_and_save(io_input, save_dir):
     """
     zf = zipfile.ZipFile(io_input)
     for name in zf.namelist():
-        geo_pdf = open(os.path.join(save_dir, name), 'wb') #look in os for platform independent dir ref
-        geo_pdf.write(zf.read(name))
-        geo_pdf.flush()
-        geo_pdf.close()
-        logger.info('Saved file %(file)s to %(dir)s' % \
-                    {'file':name, 'dir':save_dir})
+        try:
+            geo_pdf = open(os.path.join(save_dir, name), 'wb') #look in os for platform independent dir ref
+            geo_pdf.write(zf.read(name))
+            geo_pdf.flush()
+            geo_pdf.close()
+            logger.info('Saved file %(file)s to %(dir)s' % \
+                        {'file':name, 'dir':save_dir})
+        except OSError as e:
+            logger.error("OSError", e.message)
+
 
 def open_csv_get_urls(csv_dir, usgs_csv):
     """
     Opens csv and gets urls from file. Returns a list of urls.
     """
-    #TODO: try catch on this
-    histtops = csv.DictReader(open(csv_dir+usgs_csv))
-    urllist = list()
-    for row in histtops:
-        urllist.append(row['DownloadGeoPDF'])
-    urllist = random.sample(urllist, 12) #for testing
-    geourls = [url.replace(' ', '%20') for url in urllist]
-    logger.info('Number of urls in %(usgs_file)s: %(#)03d' % \
-                {'usgs_file':csv_dir+usgs_csv, '#': len(geourls)})
+    try:
+        histtops = csv.DictReader(open(csv_dir+usgs_csv))
+        urllist = list()
+        for row in histtops:
+            urllist.append(row['DownloadGeoPDF'])
+        urllist = random.sample(urllist, 12) #for testing
+        geourls = [url.replace(' ', '%20') for url in urllist]
+        logger.info('Number of urls in %(usgs_file)s: %(#)03d' % \
+                    {'usgs_file':csv_dir+usgs_csv, '#': len(geourls)})
+    except csv.Error as e:
+        logger.error("csv error", e.message)
     return geourls
 
 def get_start_and_end_index(bulk_run):
@@ -54,12 +60,16 @@ def get_start_and_end_index(bulk_run):
     global bulk load number to determine end index. If last list file doesn't exist, will start at zero. Returns start
      index and end index.
     """
-    if os.path.isfile(LAST_LIST_ITEM_FILE):
-        with open(LAST_LIST_ITEM_FILE, 'r') as f:
-            start_index = int(f.read())
-            print start_index
-            stop_index = start_index+bulk_run
-            print stop_index
+    try:
+           if os.path.isfile(LAST_LIST_ITEM_FILE):
+            with open(LAST_LIST_ITEM_FILE, 'r') as f:
+                start_index = int(f.read())
+                print start_index
+                stop_index = start_index+bulk_run
+                print stop_index
+    except OSError as e:
+        logger.error("OSError:", e.message)
+
     else:
         start_index = 0
         print start_index
@@ -99,9 +109,12 @@ def open_and_unzip_geofiles(geourls, start_index, stop_index, save_dir):
     save_last_processed_index(stop_index)
 
 def get_config_info():
-    """open usgs.ini and return config"""
-    parser = SafeConfigParser()
-    parser.read('usgs.ini')
+    """open usgs.ini and return config info"""
+    try:
+        parser = SafeConfigParser()
+        parser.read('usgs.ini')
+    except ConfigParser.ParsingError as e:
+        logger.error('Reason:', e.message)
     return parser.get('config_info', 'usgs_csv'), parser.get('config_info', 'csv_dir'), \
            parser.get('config_info', 'save_dir'), parser.getint('config_info', 'bulk_run')
 
@@ -117,7 +130,5 @@ if __name__ == '__main__':
 
 # TODO; time how long it takes to download and unzip each one - logging has time stuff
 # TODO: run as chron on doemo, investigate screen
-# TODO: set up folder in john's home folder on doemo to save to
 # TODO: log number of files in folder after the runs each time
-# TODO: timing feature for script
 #TODO: John put csv file in doemo

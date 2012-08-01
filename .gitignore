@@ -1,2 +1,5 @@
 .idea*
 *~
+usgs.log
+last_index_processed
+usgshist.csv
