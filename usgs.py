@@ -1,6 +1,6 @@
 import csv
 import zipfile
-import os
+import os, os.path
 from urllib2 import Request, urlopen, URLError
 import random
 import logging
@@ -124,11 +124,11 @@ def main():
     usgs_csv, csv_dir, save_dir, bulk_run = get_config_info() #need to refactor above to use
     start_index, stop_index = get_start_and_end_index(bulk_run)
     open_and_unzip_geofiles(open_csv_get_urls(csv_dir, usgs_csv), start_index, stop_index, save_dir)
+    logger.info('number of geopdfs in save_dir: %d' % len([name for name in os.listdir(save_dir) if os.path.isfile(name)]))
 
 if __name__ == '__main__':
     main()
 
-# TODO; time how long it takes to download and unzip each one - logging has time stuff
 # TODO: run as chron on doemo, investigate screen
 # TODO: log number of files in folder after the runs each time
 #TODO: John put csv file in doemo
