@@ -2,7 +2,6 @@ import csv
 import zipfile
 import os, os.path
 from urllib2 import Request, urlopen, URLError
-import random
 import logging
 try:
     from cStringIO import StringIO #faster
@@ -46,7 +45,6 @@ def open_csv_get_urls(csv_dir, usgs_csv):
         urllist = list()
         for row in histtops:
             urllist.append(row['DownloadGeoPDF'])
-        urllist = random.sample(urllist, 12) #for testing
         geourls = [url.replace(' ', '%20') for url in urllist]
         logger.info('Number of urls in %(usgs_file)s: %(#)03d' % \
                     {'usgs_file':csv_dir+usgs_csv, '#': len(geourls)})
@@ -72,9 +70,7 @@ def get_start_and_end_index(bulk_run):
 
     else:
         start_index = 0
-        print start_index
         stop_index = bulk_run
-        print stop_index
     return start_index, stop_index
 
 def save_last_processed_index(last_index):
@@ -128,7 +124,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# TODO: run as chron on doemo, investigate screen
-# TODO: log number of files in folder after the runs each time
-#TODO: John put csv file in doemo
