@@ -120,7 +120,8 @@ def main():
     usgs_csv, csv_dir, save_dir, bulk_run = get_config_info() #need to refactor above to use
     start_index, stop_index = get_start_and_end_index(bulk_run)
     open_and_unzip_geofiles(open_csv_get_urls(csv_dir, usgs_csv), start_index, stop_index, save_dir)
-    logger.info('number of geopdfs in save_dir: %d' % len([name for name in os.listdir(save_dir) if os.path.isfile(name)]))
+    number_geopdfs_indir = len([name for name in os.listdir(save_dir) if os.path.isfile(name)])
+    logger.info('number of geopdfs in save_dir: %d' % number_geopdfs_indir)
 
 if __name__ == '__main__':
     main()
