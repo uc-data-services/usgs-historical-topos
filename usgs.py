@@ -34,6 +34,9 @@ def unzip_geofile_and_save(io_input, save_dir):
                         {'file':name, 'dir':save_dir})
         except OSError as e:
             logger.error("OSError", e.message)
+        except IOError as e:
+            #need to look up in geourls list and grab index where
+            logger.error("IOError", e.message, e.errno)
 
 
 def open_csv_get_urls(csv_dir, usgs_csv):
