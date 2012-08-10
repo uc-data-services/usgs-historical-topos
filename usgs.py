@@ -63,17 +63,17 @@ def get_start_and_end_index(bulk_run):
     """
     try:
        if os.path.isfile(LAST_LIST_ITEM_FILE):
-        with open(LAST_LIST_ITEM_FILE, 'r') as f:
-            start_index = int(f.read())
-            print start_index
-            stop_index = start_index+bulk_run
-            print stop_index
+            with open(LAST_LIST_ITEM_FILE, 'r') as f:
+                start_index = int(f.read())
+                print start_index
+                stop_index = start_index+bulk_run
+                print stop_index
+       else:
+            start_index = 0
+            stop_index = bulk_run
     except OSError as e:
-        logger.error("OSError:", e.message)
+       logger.error("OSError:", e.message)
 
-    else:
-        start_index = 0
-        stop_index = bulk_run
     return start_index, stop_index
 
 def save_last_processed_index(last_index):
