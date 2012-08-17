@@ -2,6 +2,7 @@ import csv
 import zipfile
 import os, os.path
 from urllib2 import Request, urlopen, URLError
+import time
 import logging
 try:
     from cStringIO import StringIO #faster
@@ -18,6 +19,7 @@ formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s', datefmt='
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
+RESTART_DELAY = 10
 
 def unzip_geofile_and_save(io_input, save_dir):
     """
@@ -101,6 +103,8 @@ def open_and_unzip_geofiles(geourls, start_index, stop_index, save_dir):
             elif hasattr(e, 'code'):
                 print 'The server couldn\'t fulfill the request.'
                 logger.error('Error code: ', e.code)
+        except HTTPError as e:
+            time.sleep(RESTART_DELAY)
         else:
             data = response.read()
             input = StringIO(data)
