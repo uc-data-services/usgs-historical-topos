@@ -94,21 +94,17 @@ def open_and_unzip_geofiles(geourls, start_index, stop_index, save_dir):
     takes a list of urls, opens, and saves to a file
     """
     for index, url in enumerate(geourls[start_index:stop_index]):
-        try:
-            response = urlopen(url)
-        except URLError as e:
-            if hasattr(e, 'reason'):
-                print 'We failed to reach a server.'
+        while True:
+            try:
+                response = urlopen(url)
+            except (urllib2.URLError, urllib2.HTTPError) as e:
                 logger.error('Reason: ', e.reason)
-            elif hasattr(e, 'code'):
-                print 'The server couldn\'t fulfill the request.'
-                logger.error('Error code: ', e.code)
-        except HTTPError as e:
-            time.sleep(RESTART_DELAY)
-        else:
-            data = response.read()
-            input = StringIO(data)
-            unzip_geofile_and_save(input, save_dir)
+                time.sleep(RESTART_DELAY)
+            else:
+                data = response.read()
+                input = StringIO(data)
+                unzip_geofile_and_save(input, save_dir)
+                break
     save_last_processed_index(stop_index)
 
 def get_config_info():
