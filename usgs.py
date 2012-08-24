@@ -89,10 +89,20 @@ def save_last_processed_index(last_index):
     except IOError as err:
         logger.error(err.message) #figure out what goes in ()
 
+def get_geo_url(url):
+    """takes a geo url and returns a respnse object"""
+    try:
+        response = urlopen(url)          
+    except (urllib2.URLError, urllib2.HTTPError) as e:
+        logger.error('Reason: ', e.reason)
+        time.sleep(RESTART_DELAY)
+    return response
+
 def open_and_unzip_geofiles(geourls, start_index, stop_index, save_dir):
     """
     takes a list of urls, opens, and saves to a file
     """
+    end_index = start_index #going to keep a counter of where we are
     for index, url in enumerate(geourls[start_index:stop_index]):
         while True:
             try:
@@ -104,8 +114,9 @@ def open_and_unzip_geofiles(geourls, start_index, stop_index, save_dir):
                 data = response.read()
                 input = StringIO(data)
                 unzip_geofile_and_save(input, save_dir)
+                end_index += 1
                 break
-    save_last_processed_index(stop_index)
+    save_last_processed_index(end_index)
 
 def get_config_info():
     """open usgs.ini and return config info"""
